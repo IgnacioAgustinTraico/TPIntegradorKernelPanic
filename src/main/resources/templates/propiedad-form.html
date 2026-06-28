@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Propiedades</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="row justify-content-center py-4">
+    <div class="col-lg-9">
+        <div class="card border-0 shadow-lg rounded-4">
+            <div class="card-header bg-primary text-white py-4">
+                <h2 class="fw-bold text-center mb-0" th:text="${propiedad.id != null ? 'Editar Propiedad' : 'Registrar Nueva Propiedad'}"></h2>
+            </div>
+            <div class="card-body p-5">
+                <div th:if="${error}" class="alert alert-danger rounded-3 shadow-sm" th:text="${error}"></div>
+
+                <form th:action="@{/propiedades/guardar}" th:object="${propiedad}" method="post">
+                    <input type="hidden" th:field="*{id}"/>
+
+                    <h5 class="text-primary fw-bold mb-4">Información General</h5>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Dirección</label>
+                        <input type="text" th:field="*{direccion}" class="form-control form-control-lg shadow-sm" required>
+                    </div>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ciudad</label>
+                            <input list="ciudades" type="text" name="ciudadNombre" class="form-control shadow-sm" th:value="${propiedad.ciudad != null ? propiedad.ciudad.nombre : ''}" placeholder="Seleccione o escriba una ciudad" required>
+                            <datalist id="ciudades">
+                                <option th:each="ciudad : ${ciudades}" th:value="${ciudad.nombre}"></option>
+                            </datalist>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Propietario</label>
+                            <select name="propietarioId" class="form-select shadow-sm" required>
+                                <option value="">Seleccionar propietario</option>
+                                <option th:each="propietario : ${propietarios}"
+                                        th:value="${propietario.id}"
+                                        th:text="${propietario.nombre}"
+                                        th:selected="${propiedad.propietario != null and propiedad.propietario.id == propietario.id}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <h5 class="text-primary fw-bold mb-4">Datos del Inmueble</h5>
+
+                    <div class="row g-4">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Tipo</label>
+                            <select th:field="*{tipo}" class="form-select shadow-sm" required>
+                                <option value="">Seleccionar</option>
+                                <option th:each="tipo : ${tipos}" th:value="${tipo}" th:text="${tipo}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Metros²</label>
+                            <input type="number" step="0.01" min="0.01" th:field="*{metrosCuadrados}" class="form-control shadow-sm" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Ambientes</label>
+                            <input type="number" min="1" th:field="*{cantidadAmbientes}" class="form-control shadow-sm" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-4 mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Descripción</label>
+                            <textarea th:field="*{descripcion}" rows="5" class="form-control shadow-sm" required></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Comodidades</label>
+                            <textarea th:field="*{comodidades}" rows="5" class="form-control shadow-sm"></textarea>
+                        </div>
+                    </div>
+
+                    <hr class="my-5">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-primary">Estado</label>
+                        <select th:field="*{estadoDisponibilidad}" class="form-select form-select-lg border-primary shadow-sm" required>
+                            <option th:each="estado : ${estados}" th:value="${estado}" th:text="${estado}"></option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-3 mt-5">
+                        <a th:href="@{/propiedades}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                        <button type="submit" class="btn btn-success px-5 shadow">Guardar Propiedad</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
