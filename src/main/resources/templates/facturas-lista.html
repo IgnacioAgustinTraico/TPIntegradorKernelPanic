@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Facturas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body class="bg-light p-4">
+<div class="card border-0 shadow-lg rounded-4">
+    <div class="card-header bg-primary text-white py-4 px-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h2 class="fw-bold mb-1">Control de Facturación y Pagos</h2>
+                <small class="opacity-75">Listado de comprobantes y conciliación con filtros avanzados</small>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/}" class="btn btn-outline-light fw-bold shadow-sm px-3"><i class="bi bi-arrow-left"></i> Menú Principal</a>
+                <a th:href="@{/facturas/nueva}" class="btn btn-light fw-bold shadow-sm px-4">+ Emitir Factura</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-body p-4">
+        
+        <div class="card bg-white border shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-light fw-bold text-secondary"><i class="bi bi-funnel-fill"></i> Panel de Búsqueda y Filtros</div>
+            <div class="card-body">
+                <form th:action="@{/facturas}" method="get" class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">ID Contrato</label>
+                        <input type="number" name="contratoId" th:value="${contratoId}" class="form-control form-control-sm" placeholder="Ej: 1">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">ID Propiedad</label>
+                        <input type="number" name="propiedadId" th:value="${propiedadId}" class="form-control form-control-sm" placeholder="Ej: 5">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">ID Inquilino</label>
+                        <input type="number" name="inquilinoId" th:value="${inquilinoId}" class="form-control form-control-sm" placeholder="Ej: 12">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Estado</label>
+                        <select name="estado" class="form-select form-select-sm">
+                            <option value="">-- Todos --</option>
+                            <option th:each="est : ${estados}" th:value="${est}" th:text="${est}" th:selected="${est == estadoSeleccionado}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Vence Desde</label>
+                        <input type="date" name="fechaDesde" th:value="${fechaDesde}" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Vence Hasta</label>
+                        <input type="date" name="fechaHasta" th:value="${fechaHasta}" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                        <a th:href="@{/facturas}" class="btn btn-outline-secondary btn-sm px-3">Limpiar Filtros</a>
+                        <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold"><i class="bi bi-search"></i> Filtrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
+                <tr>
+                    <th>Identificador</th>
+                    <th>Contrato</th>
+                    <th>Propiedad</th>
+                    <th>Inquilino</th>
+                    <th>Emisión</th>
+                    <th>Vencimiento</th>
+                    <th>Importe</th>
+                    <th>Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fac : ${facturas}">
+                    <td class="fw-bold text-secondary" th:text="'#' + ${fac.id}"></td>
+                    <td>
+                        <span class="badge bg-light text-dark border" th:text="'Contrato #' + ${fac.contrato.id}"></span>
+                    </td>
+                    <td th:text="${fac.contrato.propiedad != null} ? 'ID ' + ${fac.contrato.propiedad.id} + ': ' +${fac.contrato.propiedad.direccion} +  ' - ' +${fac.contrato.propiedad.ciudad.nombre} : 'N/A'"></td>
+                    <td class="fw-semibold text-dark" th:text="${fac.contrato.inquilino != null} ? 'ID ' + ${fac.contrato.inquilino.id} + ': ' + ${fac.contrato.inquilino.nombre} : 'N/A'"></td>
+                    
+                    <td th:text="${fac.fechaEmision}"></td>
+                    <td th:text="${fac.fechaVencimiento}"></td>
+					<td class="fw-bold text-primary" 
+					    th:text="${fac.interesImporte != null} ? '$' + ${fac.importe.add(fac.interesImporte)} : '$' + ${fac.importe}">
+					</td>                    <td>
+                        <span class="badge px-3 py-2"
+                              th:classappend="${fac.estado.name() == 'PAGADA'} ? ' bg-success' : (${fac.estado.name() == 'PENDIENTE'} ? ' bg-warning text-dark' : (${fac.estado.name() == 'VENCIDA'} ? ' bg-danger' : ' bg-secondary'))"
+                              th:text="${fac.estado}"></span>
+                    </td>
+                    <td class="text-center">
+                        <a th:if="${fac.estado.name() != 'PAGADA' && fac.estado.name() != 'ANULADA'}"
+                           th:href="@{/facturas/editar/{id}(id=${fac.id})}" 
+                           class="btn btn-warning btn-sm me-1 shadow-sm">
+                           <i class="bi bi-pencil-square"></i> Modificar
+                        </a>
+
+                        <a th:if="${fac.estado.name() != 'PAGADA' && fac.estado.name() != 'ANULADA'}"
+                           th:href="@{/facturas/eliminar/{id}(id=${fac.id})}" 
+                           class="btn btn-danger btn-sm shadow-sm" 
+                           onclick="return confirm('¿Está seguro de anular/eliminar esta factura?');">
+                           <i class="bi bi-trash3-fill"></i> Eliminar
+                        </a>
+                        
+                        <span th:if="${fac.estado.name() == 'PAGADA'}" class="text-success small fw-bold">
+                            <i class="bi bi-check-circle-fill"></i> Gestión Cerrada
+                        </span>
+                        <span th:if="${fac.estado.name() == 'ANULADA'}" class="text-muted small fw-bold">
+                            <i class="bi bi-x-circle-fill"></i> Comprobante Anulado
+                        </span>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(facturas)}">
+                    <td colspan="9" class="text-center py-5">
+                        <div class="text-secondary">
+                            <i class="bi bi-exclamation-circle fs-2"></i>
+                            <h5 class="mt-2">No se encontraron facturas que coincidan con los filtros aplicados</h5>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
