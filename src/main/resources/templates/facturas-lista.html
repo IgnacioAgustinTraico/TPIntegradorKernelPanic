@@ -85,17 +85,21 @@
                     <td>
                         <span class="badge bg-light text-dark border" th:text="'Contrato #' + ${fac.contrato.id}"></span>
                     </td>
-                    <td th:text="${fac.contrato.propiedad != null} ? 'ID ' + ${fac.contrato.propiedad.id} + ': ' +${fac.contrato.propiedad.direccion} +  ' - ' +${fac.contrato.propiedad.ciudad.nombre} : 'N/A'"></td>
+                    <td th:text="${fac.contrato.propiedad != null} ? 'ID ' + ${fac.contrato.propiedad.id} + ': ' + ${fac.contrato.propiedad.direccion} + ' - ' + ${fac.contrato.propiedad.ciudad.nombre} : 'N/A'"></td>
                     <td class="fw-semibold text-dark" th:text="${fac.contrato.inquilino != null} ? 'ID ' + ${fac.contrato.inquilino.id} + ': ' + ${fac.contrato.inquilino.nombre} : 'N/A'"></td>
                     
                     <td th:text="${fac.fechaEmision}"></td>
                     <td th:text="${fac.fechaVencimiento}"></td>
-					<td class="fw-bold text-primary" 
-					    th:text="${fac.interesImporte != null} ? '$' + ${fac.importe.add(fac.interesImporte)} : '$' + ${fac.importe}">
-					</td>                    <td>
+                    
+                    <td class="fw-bold text-primary" 
+                        th:text="${fac.estado.name() == 'PAGADA' and fac.importePagado != null} ? '$' + ${fac.importePagado} : '$' + ${fac.importe}">
+                    </td>                    
+                    
+                    <td>
                         <span class="badge px-3 py-2"
                               th:classappend="${fac.estado.name() == 'PAGADA'} ? ' bg-success' : (${fac.estado.name() == 'PENDIENTE'} ? ' bg-warning text-dark' : (${fac.estado.name() == 'VENCIDA'} ? ' bg-danger' : ' bg-secondary'))"
-                              th:text="${fac.estado}"></span>
+                              th:text="${fac.estado}">
+                        </span>
                     </td>
                     <td class="text-center">
                         <a th:if="${fac.estado.name() != 'PAGADA' && fac.estado.name() != 'ANULADA'}"
