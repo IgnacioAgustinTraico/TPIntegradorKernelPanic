@@ -58,11 +58,8 @@ public class PropiedadService {
         Ciudad ciudad = obtenerOCrearCiudad(ciudadNombre);
         propiedad.setCiudad(ciudad);
 
-        if (propiedad.getEstadoDisponibilidad() == EstadoPropiedad.ALQUILADA) {
-            propiedad.setContratoActivo(true);
-        }
-
         if (propiedad.getId() == null) {
+            propiedad.setContratoActivo(Boolean.FALSE);
             Long idEvaluar = -1L;
             if (propiedadRepository.existsByDireccionAndCiudadAndEliminadaFalseAndIdNot(
                     propiedad.getDireccion().trim(), ciudad, idEvaluar)) {
