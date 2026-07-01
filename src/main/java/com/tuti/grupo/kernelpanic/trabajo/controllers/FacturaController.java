@@ -145,6 +145,10 @@ public class FacturaController {
                 factura.setContrato(contratoCompleto);
             }
 
+            if (factura.getId() != null && factura.getFechaPago() == null) {
+                factura.setFechaPago(LocalDate.now());
+            }
+
             model.addAttribute("factura", factura); 
 
             if (factura.getId() != null) {
