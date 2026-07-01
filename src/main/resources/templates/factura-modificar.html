@@ -61,12 +61,15 @@
             </div>
             
             <h5 class="fw-bold text-secondary border-bottom pb-2 mb-3 mt-4">2. Registro de Cobro / Conciliación</h5>
-
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Fecha en que Pagó</label>
-                <input type="date" th:field="*{fechaPago}" class="form-control" />
-            </div>
-
+			<div class="col-md-4">
+			    <label class="form-label fw-semibold">Fecha en que Pagó</label>
+			    <input type="date" 
+			           th:value="${factura.fechaPago != null} ? ${#temporals.format(factura.fechaPago, 'yyyy-MM-dd')} : ''" 
+			           name="fechaPago" 
+			           id="fechaPago" 
+			           class="form-control" />
+			</div>
+			
             <div class="col-md-4">
                 <label class="form-label fw-semibold">Medio de Pago</label>
                 <select th:field="*{medioPago}" class="form-select">

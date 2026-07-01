@@ -34,8 +34,9 @@ public class Factura {
     @Column(name = "concepto_facturado", nullable = false)
     private String conceptoFacturado;
     
+    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
     private LocalDate fechaPago;
-
+    
     @Enumerated(EnumType.STRING)
     private MedioPago medioPago;
 

@@ -75,6 +75,7 @@ public class FacturaController {
         return "factura-form";
     }
 
+    
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable("id") Long id, Model model) {
         Factura factura = facturaService.obtenerPorId(id);
@@ -84,6 +85,14 @@ public class FacturaController {
             model.addAttribute("facturas", facturaRepository.findByEliminadoFalse());
             model.addAttribute("estados", EstadoFactura.values());
             return "facturas-lista"; 
+        }
+        
+        if (factura.getEstado() != EstadoFactura.PAGADA) {
+            factura.setFechaPago(LocalDate.now());
+            
+            if (factura.getInteresImporte() == null) {
+                factura.setInteresImporte(java.math.BigDecimal.ZERO);
+            }
         }
         
         model.addAttribute("factura", factura);
@@ -97,7 +106,7 @@ public class FacturaController {
         
         return "factura-modificar"; 
     }
-
+    
     @PostMapping("/guardar")
     public String guardar(@ModelAttribute("factura") Factura factura, Model model) {
         try {
