@@ -60,7 +60,6 @@ public class FacturaController {
     public String mostrarFormularioNuevo(Model model) {
         Factura factura = new Factura();
         factura.setFechaEmision(LocalDate.now());
-        factura.setEstado(EstadoFactura.PENDIENTE); 
         factura.setConceptoFacturado(""); 
 
         List<Contrato> contratosActivos = contratoRepository.findByEliminadoFalse().stream()
@@ -69,13 +68,13 @@ public class FacturaController {
 
         model.addAttribute("factura", factura);
         model.addAttribute("contratos", contratosActivos);
+        model.addAttribute("estados", EstadoFactura.values());
         model.addAttribute("mediosPago", Arrays.asList(MedioPago.values())); 
         model.addAttribute("esEdicion", false);
         
         return "factura-form";
     }
 
-    
     @GetMapping("/editar/{id}")
     public String mostrarFormularioEditar(@PathVariable("id") Long id, Model model) {
         Factura factura = facturaService.obtenerPorId(id);
@@ -85,14 +84,6 @@ public class FacturaController {
             model.addAttribute("facturas", facturaRepository.findByEliminadoFalse());
             model.addAttribute("estados", EstadoFactura.values());
             return "facturas-lista"; 
-        }
-        
-        if (factura.getEstado() != EstadoFactura.PAGADA) {
-            factura.setFechaPago(LocalDate.now());
-            
-            if (factura.getInteresImporte() == null) {
-                factura.setInteresImporte(java.math.BigDecimal.ZERO);
-            }
         }
         
         model.addAttribute("factura", factura);
@@ -106,10 +97,14 @@ public class FacturaController {
         
         return "factura-modificar"; 
     }
-    
+
     @PostMapping("/guardar")
     public String guardar(@ModelAttribute("factura") Factura factura, Model model) {
         try {
+            if (factura.getEstado() == null) {
+                throw new IllegalArgumentException("Debe seleccionar un estado para la factura.");
+            }
+
             if (factura.getEstado() == EstadoFactura.PAGADA) {
                 if (factura.getFechaPago() == null || factura.getMedioPago() == null || factura.getImportePagado() == null) {
                     throw new IllegalArgumentException("Para marcar la factura como PAGADA debe completar la Fecha, el Medio de Pago y el Importe Pagado Real.");
@@ -145,10 +140,6 @@ public class FacturaController {
                 factura.setContrato(contratoCompleto);
             }
 
-            if (factura.getId() != null && factura.getFechaPago() == null) {
-                factura.setFechaPago(LocalDate.now());
-            }
-
             model.addAttribute("factura", factura); 
 
             if (factura.getId() != null) {
@@ -164,6 +155,7 @@ public class FacturaController {
                         .filter(c -> c.getEstado() == EstadoContrato.ACTIVO)
                         .toList();
                 model.addAttribute("contratos", contratosActivos);
+                model.addAttribute("estados", EstadoFactura.values());
                 return "factura-form"; 
             }
         }

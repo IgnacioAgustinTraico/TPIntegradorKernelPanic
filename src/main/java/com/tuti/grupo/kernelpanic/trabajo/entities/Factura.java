@@ -26,6 +26,9 @@ public class Factura {
 
     @Column(name = "importe", nullable = false) 
     private BigDecimal importe;
+
+    @Column(name = "importe_total", nullable = false)
+    private BigDecimal importeTotal;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -34,9 +37,8 @@ public class Factura {
     @Column(name = "concepto_facturado", nullable = false)
     private String conceptoFacturado;
     
-    @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE)
     private LocalDate fechaPago;
-    
+
     @Enumerated(EnumType.STRING)
     private MedioPago medioPago;
 
@@ -87,6 +89,8 @@ public class Factura {
     public void setFechaVencimiento(LocalDate fechaVencimiento) { this.fechaVencimiento = fechaVencimiento; }
     public BigDecimal getImporte() { return importe; }
     public void setImporte(BigDecimal importe) { this.importe = importe; }
+    public BigDecimal getImporteTotal() { return importeTotal; }
+    public void setImporteTotal(BigDecimal importeTotal) { this.importeTotal = importeTotal; }
     public EstadoFactura getEstado() { return estado; }
     public void setEstado(EstadoFactura estado) { this.estado = estado; }
     public LocalDate getFechaPago() { return fechaPago; }

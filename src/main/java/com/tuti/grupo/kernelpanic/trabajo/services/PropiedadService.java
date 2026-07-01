@@ -61,30 +61,56 @@ public class PropiedadService {
             propiedad.setContratoActivo(true);
         }
 
-        Long idEvaluar = propiedad.getId() != null ? propiedad.getId() : -1L;
-        if (propiedadRepository.existsByDireccionAndCiudadAndEliminadaFalseAndIdNot(
-                propiedad.getDireccion().trim(), ciudad, idEvaluar)) {
-            throw new IllegalArgumentException("Ya existe una propiedad activa con esa dirección y ciudad.");
-        }
-
-        if (propiedad.getHistorial() == null) {
-            propiedad.setHistorial(new java.util.ArrayList<>());
-        }
-
         if (propiedad.getId() == null) {
+            Long idEvaluar = -1L;
+            if (propiedadRepository.existsByDireccionAndCiudadAndEliminadaFalseAndIdNot(
+                    propiedad.getDireccion().trim(), ciudad, idEvaluar)) {
+                throw new IllegalArgumentException("Ya existe una propiedad activa con esa dirección y ciudad.");
+            }
+
+            if (propiedad.getHistorial() == null) {
+                propiedad.setHistorial(new java.util.ArrayList<>());
+            }
             agregarHistorial(propiedad, propiedad.getEstadoDisponibilidad());
+            return propiedadRepository.save(propiedad);
         } else {
             Propiedad propiedadAnterior = buscarPorId(propiedad.getId()).orElse(null);
             if (propiedadAnterior != null) {
+                Long idEvaluar = propiedad.getId();
+                if (propiedadRepository.existsByDireccionAndCiudadAndEliminadaFalseAndIdNot(
+                        propiedad.getDireccion().trim(), ciudad, idEvaluar)) {
+                    throw new IllegalArgumentException("Ya existe una propiedad activa con esa dirección y ciudad.");
+                }
+
                 if (Boolean.TRUE.equals(propiedadAnterior.getContratoActivo())
                         && (propiedad.getEstadoDisponibilidad() == EstadoPropiedad.DISPONIBLE
                         || propiedad.getEstadoDisponibilidad() == EstadoPropiedad.INACTIVA)
                         && !propiedadAnterior.getEstadoDisponibilidad().equals(propiedad.getEstadoDisponibilidad())) {
                     throw new IllegalArgumentException("No se puede cambiar el estado a Disponible o Inactiva mientras hay un contrato activo vigente.");
                 }
-                if (!propiedadAnterior.getEstadoDisponibilidad().equals(propiedad.getEstadoDisponibilidad())) {
-                    agregarHistorial(propiedad, propiedad.getEstadoDisponibilidad());
+
+                Propiedad propiedadPersistida = propiedadAnterior;
+                propiedadPersistida.setDireccion(propiedad.getDireccion());
+                propiedadPersistida.setCiudad(ciudad);
+                propiedadPersistida.setPropietario(propiedad.getPropietario());
+                propiedadPersistida.setTipo(propiedad.getTipo());
+                propiedadPersistida.setCantidadAmbientes(propiedad.getCantidadAmbientes());
+                propiedadPersistida.setMetrosCuadrados(propiedad.getMetrosCuadrados());
+                propiedadPersistida.setDescripcion(propiedad.getDescripcion());
+                propiedadPersistida.setComodidades(propiedad.getComodidades());
+                propiedadPersistida.setEliminada(propiedad.getEliminada());
+                propiedadPersistida.setContratoActivo(propiedad.getContratoActivo());
+                propiedadPersistida.setEstadoDisponibilidad(propiedad.getEstadoDisponibilidad());
+
+                if (propiedadPersistida.getHistorial() == null) {
+                    propiedadPersistida.setHistorial(new java.util.ArrayList<>());
                 }
+
+                if (!propiedadAnterior.getEstadoDisponibilidad().equals(propiedad.getEstadoDisponibilidad())) {
+                    agregarHistorial(propiedadPersistida, propiedad.getEstadoDisponibilidad());
+                }
+
+                return propiedadRepository.save(propiedadPersistida);
             }
         }
 
