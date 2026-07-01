@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="navbar" class="mb-4">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary rounded-4 shadow-sm px-3 py-2">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" th:href="@{/}">Kernel Panic</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNavbar">
+                    <ul class="navbar-nav ms-auto gap-lg-2">
+                        <li class="nav-item"><a class="nav-link text-white" th:href="@{/}">Inicio</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" th:href="@{/propiedades}">Propiedades</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" th:href="@{/publicaciones}">Publicaciones</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" th:href="@{/contratos}">Contratos</a></li>
+                        <li class="nav-item"><a class="nav-link text-white" th:href="@{/facturas}">Facturas</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+</body>
+</html>
