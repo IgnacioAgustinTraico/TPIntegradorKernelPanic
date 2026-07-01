@@ -32,12 +32,8 @@
                         <input type="text" name="direccion" th:value="${direccion}" class="form-control form-control-sm" placeholder="Ej: San Martín">
                     </div>
                     <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">ID Propiedad</label>
-                        <input type="number" name="propiedadId" th:value="${propiedadId}" class="form-control form-control-sm" placeholder="Ej: 5">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">ID Inquilino</label>
-                        <input type="number" name="inquilinoId" th:value="${inquilinoId}" class="form-control form-control-sm" placeholder="Ej: 12">
+                        <label class="form-label small fw-bold text-muted">Inquilino</label>
+                        <input type="text" name="inquilinoNombre" th:value="${inquilinoNombre}" class="form-control form-control-sm" placeholder="Ej: Juan Pérez">
                     </div>
                     <div class="col-md-2">
                         <label class="form-label small fw-bold text-muted">Estado</label>
@@ -79,7 +75,7 @@
                     <td class="fw-bold" th:text="${con.id}"></td>
                     <td th:text="${con.propiedad.direccion} + ' (' + ${con.propiedad.ciudad.nombre} + ')'"></td>
                     <td th:text="${con.propiedad.propietario != null ? con.propiedad.propietario.nombre : '-'}"></td>
-                    <td th:text="${con.inquilino.nombre}"></td>
+                    <td th:text="${con.inquilino != null ? con.inquilino.nombre : '-'}"></td>
                     <td th:text="${con.fechaInicio}"></td>
                     <td th:text="${con.duracionMeses} + ' m.'"></td>
                     <td class="fw-bold text-success" th:text="'$' + ${con.importeMensual}"></td>

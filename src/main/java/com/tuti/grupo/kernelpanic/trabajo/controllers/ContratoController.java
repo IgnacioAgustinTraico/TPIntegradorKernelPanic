@@ -27,15 +27,13 @@ public class ContratoController {
     @GetMapping
     public String listarContratos(
             @RequestParam(required = false) String direccion,
-            @RequestParam(required = false) Long propiedadId,
-            @RequestParam(required = false) Long inquilinoId,
+            @RequestParam(required = false) String inquilinoNombre,
             @RequestParam(required = false) EstadoContrato estado,
             @RequestParam(required = false) java.time.LocalDate fechaInicio,
             Model model) {
-        model.addAttribute("contratos", contratoService.filtrar(direccion, propiedadId, inquilinoId, estado, fechaInicio));
+        model.addAttribute("contratos", contratoService.filtrar(direccion, inquilinoNombre, estado, fechaInicio));
         model.addAttribute("direccion", direccion);
-        model.addAttribute("propiedadId", propiedadId);
-        model.addAttribute("inquilinoId", inquilinoId);
+        model.addAttribute("inquilinoNombre", inquilinoNombre);
         model.addAttribute("estadoSeleccionado", estado);
         model.addAttribute("fechaInicio", fechaInicio);
         model.addAttribute("estados", EstadoContrato.values());

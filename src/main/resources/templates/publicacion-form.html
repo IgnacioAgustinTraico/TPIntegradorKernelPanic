@@ -41,14 +41,19 @@
                 </select>
             </div>
 
-            <div class="col-12">
-                <label class="form-label fw-semibold">Descripción Corta</label>
-                <input type="text" th:field="*{descripcion}" class="form-control" placeholder="Ej: Excelente iluminación y ubicación estratégica." />
+            <div class="col-md-6">
+                <label class="form-label fw-semibold">Fecha de Publicación</label>
+                <input type="date" th:field="*{fechaPublicacion}" class="form-control" required/>
             </div>
 
             <div class="col-12">
-                <label class="form-label fw-semibold">Condiciones Contractuales</label>
-                <textarea th:field="*{condiciones}" class="form-control" rows="3" placeholder="Ej: Ajuste semestral por ICL, requiere garantía propietaria..."></textarea>
+                <label class="form-label fw-semibold">Descripción de la propiedad</label>
+                <textarea th:field="*{descripcion}" class="form-control" rows="5" placeholder="Ej: Excelente iluminación, ambientes amplios y ubicación estratégica."></textarea>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label fw-semibold">Condiciones de alquiler</label>
+                <textarea th:field="*{condiciones}" class="form-control" rows="5" placeholder="Ej: Depósito, garantía, si acepta mascotas u otras condiciones..."></textarea>
             </div>
 
             <div class="col-12 d-flex justify-content-between mt-4">

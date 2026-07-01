@@ -1,6 +1,7 @@
 package com.tuti.grupo.kernelpanic.trabajo.entities;
 
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,9 +22,11 @@ public class Publicacion {
     @Column(columnDefinition = "TEXT")
     private String condiciones;
 
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     @Column(nullable = false)
     private LocalDate fechaPublicacion;
 
+    @Column(columnDefinition = "TEXT")
     private String descripcion;
 
     @Enumerated(EnumType.STRING)
@@ -67,5 +70,14 @@ public class Publicacion {
         historial.setFechaHora(LocalDateTime.now());
         historial.setPublicacion(this);
         this.historialEstados.add(historial);
+    }
+
+    public void actualizarEstado(EstadoPublicacion nuevoEstado) {
+        if (nuevoEstado != null && nuevoEstado != this.estado) {
+            this.estado = nuevoEstado;
+            agregarHistorialEstado(nuevoEstado);
+        } else if (this.historialEstados.isEmpty() && this.estado != null) {
+            agregarHistorialEstado(this.estado);
+        }
     }
 }

@@ -2,6 +2,7 @@ package com.tuti.grupo.kernelpanic.trabajo.controllers;
 
 import com.tuti.grupo.kernelpanic.trabajo.entities.Publicacion;
 import com.tuti.grupo.kernelpanic.trabajo.entities.EstadoPublicacion;
+import com.tuti.grupo.kernelpanic.trabajo.repositories.CiudadRepository;
 import com.tuti.grupo.kernelpanic.trabajo.services.PublicacionService;
 import com.tuti.grupo.kernelpanic.trabajo.services.PropiedadService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class PublicacionController {
     @Autowired
     private PropiedadService propiedadService;
 
+    @Autowired
+    private CiudadRepository ciudadRepository;
+
     @GetMapping
     public String listarPublicaciones(
             @RequestParam(required = false) Long propiedadId,
@@ -35,6 +39,7 @@ public class PublicacionController {
         model.addAttribute("estadoSeleccionado", estado);
         model.addAttribute("precioMin", precioMin);
         model.addAttribute("precioMax", precioMax);
+        model.addAttribute("ciudades", ciudadRepository.findAll());
         model.addAttribute("estados", EstadoPublicacion.values());
         return "publicaciones-lista";
     }
@@ -43,6 +48,7 @@ public class PublicacionController {
     public String mostrarFormularioNueva(Model model) {
         model.addAttribute("publicacion", new Publicacion());
         model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
+        model.addAttribute("ciudades", ciudadRepository.findAll());
         model.addAttribute("estados", EstadoPublicacion.values());
         return "publicacion-form";
     }
@@ -53,6 +59,7 @@ public class PublicacionController {
             Publicacion publicacion = publicacionService.buscarPorId(id);
             model.addAttribute("publicacion", publicacion);
             model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
+            model.addAttribute("ciudades", ciudadRepository.findAll());
             model.addAttribute("estados", EstadoPublicacion.values());
             return "publicacion-form";
         } catch (RuntimeException e) {
@@ -70,7 +77,9 @@ public class PublicacionController {
             return "redirect:/publicaciones";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("publicacion", publicacion);
             model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
+            model.addAttribute("ciudades", ciudadRepository.findAll());
             model.addAttribute("estados", EstadoPublicacion.values());
             return "publicacion-form";
         }

@@ -28,10 +28,6 @@
             <div class="card-header bg-light fw-bold text-secondary">Panel de búsqueda y filtros</div>
             <div class="card-body">
                 <form th:action="@{/publicaciones}" method="get" class="row g-3">
-                    <div class="col-md-2">
-                        <label class="form-label small fw-bold text-muted">ID Propiedad</label>
-                        <input type="number" name="propiedadId" th:value="${propiedadId}" class="form-control form-control-sm" placeholder="Ej: 3">
-                    </div>
                     <div class="col-md-5">
                         <label class="form-label small fw-bold text-muted">Dirección</label>
                         <input type="text" name="direccion" th:value="${direccion}" class="form-control form-control-sm" placeholder="Ej: Rivadavia">
@@ -69,6 +65,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Propiedad (Dirección)</th>
+                    <th>Ciudad</th>
                     <th>Precio Mensual</th>
                     <th>Fecha Publicación</th>
                     <th>Descripción</th>
@@ -80,6 +77,7 @@
                 <tr th:each="pub : ${publicaciones}">
                     <td class="fw-bold" th:text="${pub.id}"></td>
                     <td th:text="${pub.propiedad != null ? pub.propiedad.direccion + ' (' + pub.propiedad.ciudad.nombre + ')' : '-'}"></td>
+                    <td th:text="${pub.propiedad != null && pub.propiedad.ciudad != null ? pub.propiedad.ciudad.nombre : '-'}"></td>
                     <td class="fw-bold text-success" th:text="'$' + ${pub.precioMensual}"></td>
                     <td th:text="${pub.fechaPublicacion}"></td>
                     <td th:text="${pub.descripcion}"></td>
@@ -95,7 +93,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(publicaciones)}">
-                    <td colspan="7" class="text-center py-5">
+                    <td colspan="8" class="text-center py-5">
                         <div class="text-secondary">
                             <h5>No hay publicaciones activas registradas</h5>
                             <small>Presione "Nueva Publicación" para comenzar.</small>

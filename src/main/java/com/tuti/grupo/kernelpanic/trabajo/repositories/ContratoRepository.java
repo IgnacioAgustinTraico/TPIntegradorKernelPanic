@@ -19,16 +19,14 @@ public interface ContratoRepository extends JpaRepository<Contrato, Long> {
             select c from Contrato c
             where c.eliminado = false
               and (:direccion is null or :direccion = '' or lower(c.propiedad.direccion) like lower(concat('%', :direccion, '%')))
-              and (:propiedadId is null or c.propiedad.id = :propiedadId)
-              and (:inquilinoId is null or c.inquilino.id = :inquilinoId)
+              and (:inquilinoNombre is null or :inquilinoNombre = '' or lower(c.inquilino.nombre) like lower(concat('%', :inquilinoNombre, '%')))
               and (:estado is null or c.estado = :estado)
               and (:fechaInicio is null or c.fechaInicio = :fechaInicio)
             order by c.id desc
             """)
     List<Contrato> buscarConFiltros(
             @Param("direccion") String direccion,
-            @Param("propiedadId") Long propiedadId,
-            @Param("inquilinoId") Long inquilinoId,
+            @Param("inquilinoNombre") String inquilinoNombre,
             @Param("estado") EstadoContrato estado,
             @Param("fechaInicio") LocalDate fechaInicio
     );

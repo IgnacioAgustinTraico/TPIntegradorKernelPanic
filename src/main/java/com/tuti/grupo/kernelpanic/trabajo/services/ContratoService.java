@@ -3,7 +3,6 @@ package com.tuti.grupo.kernelpanic.trabajo.services;
 import com.tuti.grupo.kernelpanic.trabajo.entities.Contrato;
 import com.tuti.grupo.kernelpanic.trabajo.entities.EstadoContrato;
 import com.tuti.grupo.kernelpanic.trabajo.entities.EstadoPropiedad;
-import com.tuti.grupo.kernelpanic.trabajo.entities.HistorialEstadoContrato;
 import com.tuti.grupo.kernelpanic.trabajo.entities.Propiedad;
 import com.tuti.grupo.kernelpanic.trabajo.repositories.ContratoRepository;
 import com.tuti.grupo.kernelpanic.trabajo.repositories.PropiedadRepository;
@@ -27,8 +26,8 @@ public class ContratoService {
         return contratoRepository.findByEliminadoFalse();
     }
 
-    public List<Contrato> filtrar(String direccion, Long propiedadId, Long inquilinoId, EstadoContrato estado, LocalDate fechaInicio) {
-        return contratoRepository.buscarConFiltros(direccion, propiedadId, inquilinoId, estado, fechaInicio);
+    public List<Contrato> filtrar(String direccion, String inquilinoNombre, EstadoContrato estado, LocalDate fechaInicio) {
+        return contratoRepository.buscarConFiltros(direccion, inquilinoNombre, estado, fechaInicio);
     }
 
     public Contrato buscarPorId(Long id) {
@@ -108,7 +107,16 @@ public class ContratoService {
         if (contrato.getId() == null) {
             contrato.agregarHistorialEstado(contrato.getEstado());
         } else if (contratoOriginal != null && contratoOriginal.getEstado() != contrato.getEstado()) {
-            contrato.agregarHistorialEstado(contrato.getEstado());
+            contratoOriginal.agregarHistorialEstado(contrato.getEstado());
+            contratoOriginal.setFechaInicio(contrato.getFechaInicio());
+            contratoOriginal.setDuracionMeses(contrato.getDuracionMeses());
+            contratoOriginal.setImporteMensual(contrato.getImporteMensual());
+            contratoOriginal.setDiaVencimientoMensual(contrato.getDiaVencimientoMensual());
+            contratoOriginal.setDescripcion(contrato.getDescripcion());
+            contratoOriginal.setEstado(contrato.getEstado());
+            contratoOriginal.setInquilino(contrato.getInquilino());
+            contratoOriginal.setPropiedad(propiedad);
+            return contratoRepository.save(contratoOriginal);
         }
 
         return contratoRepository.save(contrato);
