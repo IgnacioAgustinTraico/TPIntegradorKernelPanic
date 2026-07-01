@@ -49,7 +49,7 @@ public class Propiedad {
     @Column(name = "contrato_activo", nullable = false, columnDefinition = "BIT(1)")
     private Boolean contratoActivo = false;
 
-    @OneToMany(mappedBy = "propiedad", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(mappedBy = "propiedad", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<HistorialEstado> historial = new ArrayList<>();
 
     public Propiedad() {
@@ -156,6 +156,17 @@ public class Propiedad {
     }
 
     public void setHistorial(List<HistorialEstado> historial) {
-        this.historial = historial;
+        this.historial = new ArrayList<>();
+        if (historial != null) {
+            historial.forEach(this::agregarHistorial);
+        }
+    }
+
+    public void agregarHistorial(HistorialEstado historialEstado) {
+        if (historialEstado == null) {
+            return;
+        }
+        historialEstado.setPropiedad(this);
+        this.historial.add(historialEstado);
     }
 }

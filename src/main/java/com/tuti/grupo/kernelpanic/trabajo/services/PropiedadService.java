@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -68,14 +69,13 @@ public class PropiedadService {
                 throw new IllegalArgumentException("Ya existe una propiedad activa con esa dirección y ciudad.");
             }
 
-            if (propiedad.getHistorial() == null) {
-                propiedad.setHistorial(new java.util.ArrayList<>());
-            }
+            propiedad.setHistorial(new ArrayList<>());
             agregarHistorial(propiedad, propiedad.getEstadoDisponibilidad());
             return propiedadRepository.save(propiedad);
         } else {
             Propiedad propiedadAnterior = buscarPorId(propiedad.getId()).orElse(null);
             if (propiedadAnterior != null) {
+                EstadoPropiedad estadoAnterior = propiedadAnterior.getEstadoDisponibilidad();
                 Long idEvaluar = propiedad.getId();
                 if (propiedadRepository.existsByDireccionAndCiudadAndEliminadaFalseAndIdNot(
                         propiedad.getDireccion().trim(), ciudad, idEvaluar)) {
@@ -103,10 +103,10 @@ public class PropiedadService {
                 propiedadPersistida.setEstadoDisponibilidad(propiedad.getEstadoDisponibilidad());
 
                 if (propiedadPersistida.getHistorial() == null) {
-                    propiedadPersistida.setHistorial(new java.util.ArrayList<>());
+                    propiedadPersistida.setHistorial(new ArrayList<>());
                 }
 
-                if (!propiedadAnterior.getEstadoDisponibilidad().equals(propiedad.getEstadoDisponibilidad())) {
+                if (!estadoAnterior.equals(propiedad.getEstadoDisponibilidad())) {
                     agregarHistorial(propiedadPersistida, propiedad.getEstadoDisponibilidad());
                 }
 
@@ -123,6 +123,15 @@ public class PropiedadService {
 
         if (Boolean.TRUE.equals(propiedad.getContratoActivo())) {
             throw new IllegalArgumentException("No se puede eliminar una propiedad con un contrato activo vigente.");
+        }
+
+        if (propiedad.getHistorial() == null) {
+            propiedad.setHistorial(new ArrayList<>());
+        }
+
+        if (!EstadoPropiedad.INACTIVA.equals(propiedad.getEstadoDisponibilidad())) {
+            propiedad.setEstadoDisponibilidad(EstadoPropiedad.INACTIVA);
+            agregarHistorial(propiedad, EstadoPropiedad.INACTIVA);
         }
 
         propiedad.setEliminada(true);
@@ -170,7 +179,6 @@ public class PropiedadService {
 
     private void agregarHistorial(Propiedad propiedad, EstadoPropiedad estado) {
         HistorialEstado nuevoHistorial = new HistorialEstado(estado, LocalDateTime.now());
-        nuevoHistorial.setPropiedad(propiedad);
-        propiedad.getHistorial().add(nuevoHistorial);
+        propiedad.agregarHistorial(nuevoHistorial);
     }
 }

@@ -54,36 +54,38 @@
 
             <div class="col-md-12 mt-4 bg-white p-3 border rounded shadow-sm">
                 <label class="form-label fw-bold text-dark">Gestión de Estado del Comprobante (*)</label>
-                <select th:field="*{estado}" class="form-select" required>
+                <select th:field="*{estado}" id="estadoFactura" class="form-select" required>
                     <option th:each="est : ${estadosPermitidos}" 
                             th:value="${est}" 
                             th:text="${est}"></option>
                 </select>
             </div>
-            
-            <h5 class="fw-bold text-secondary border-bottom pb-2 mb-3 mt-4">2. Registro de Cobro / Conciliación</h5>
 
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Fecha en que Pagó</label>
-                <input type="date" th:field="*{fechaPago}" class="form-control" />
-            </div>
+            <div id="registroCobroSection" class="row g-3 mt-1">
+                <h5 class="fw-bold text-secondary border-bottom pb-2 mb-3 mt-4">2. Registro de Cobro / Conciliación</h5>
 
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Medio de Pago</label>
-                <select th:field="*{medioPago}" class="form-select">
-                    <option value="">-- Sin Registrar Pago --</option>
-                    <option th:each="mp : ${mediosPago}" th:value="${mp}" th:text="${mp}"></option>
-                </select>
-            </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Fecha en que Pagó</label>
+                    <input type="date" th:field="*{fechaPago}" class="form-control" />
+                </div>
 
-            <div class="col-md-4">
-                <label class="form-label fw-semibold">Importe Pagado Real ($)</label>
-                <input type="number" step="0.01" th:min="*{importe}" th:field="*{importePagado}" class="form-control" placeholder="Monto abonado" />
-            </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Medio de Pago</label>
+                    <select th:field="*{medioPago}" class="form-select">
+                        <option value="">-- Sin Registrar Pago --</option>
+                        <option th:each="mp : ${mediosPago}" th:value="${mp}" th:text="${mp}"></option>
+                    </select>
+                </div>
 
-            <div class="col-md-12">
-                <label class="form-label fw-semibold">Intereses de Mora Pagados ($)</label>
-                <input type="number" step="0.01" min="0.00" th:field="*{interesImporte}" class="form-control" placeholder="0.00" />
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Importe Pagado Real ($)</label>
+                    <input type="number" step="0.01" th:min="*{importe}" th:field="*{importePagado}" class="form-control" placeholder="Monto abonado" />
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label fw-semibold">Intereses de Mora Pagados ($)</label>
+                    <input type="number" step="0.01" min="0.00" th:field="*{interesImporte}" class="form-control" placeholder="0.00" />
+                </div>
             </div>
 
             <div class="col-12 d-flex justify-content-between mt-5">
@@ -93,5 +95,46 @@
         </form>
     </div>
 </div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const estadoSelect = document.getElementById('estadoFactura');
+        const registroCobroSection = document.getElementById('registroCobroSection');
+
+        if (!estadoSelect || !registroCobroSection) {
+            return;
+        }
+
+        const fechaPago = document.querySelector('input[name="fechaPago"]');
+        const medioPago = document.querySelector('select[name="medioPago"]');
+        const importePagado = document.querySelector('input[name="importePagado"]');
+        const interesImporte = document.querySelector('input[name="interesImporte"]');
+        const camposCobro = [fechaPago, medioPago, importePagado, interesImporte].filter(Boolean);
+
+        function actualizarSeccionCobro() {
+            const esPagada = estadoSelect.value === 'PAGADA';
+            registroCobroSection.style.display = esPagada ? '' : 'none';
+
+            camposCobro.forEach(function (campo) {
+                campo.disabled = !esPagada;
+                if (!esPagada) {
+                    campo.value = '';
+                }
+            });
+
+            if (fechaPago) {
+                fechaPago.required = esPagada;
+            }
+            if (medioPago) {
+                medioPago.required = esPagada;
+            }
+            if (importePagado) {
+                importePagado.required = esPagada;
+            }
+        }
+
+        estadoSelect.addEventListener('change', actualizarSeccionCobro);
+        actualizarSeccionCobro();
+    });
+</script>
 </body>
 </html>

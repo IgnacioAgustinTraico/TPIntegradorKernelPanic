@@ -124,7 +124,12 @@ public class FacturaServiceImpl implements FacturaService {
             throw new IllegalArgumentException("El importe debe ser un número positivo.");
         }
 
-        BigDecimal interesCalculado = facturaActualizada.getInteresImporte() != null ? facturaActualizada.getInteresImporte() : BigDecimal.ZERO;
+        if (estadoNuevo == EstadoFactura.ANULADA) {
+            facturaActualizada.setFechaPago(null);
+            facturaActualizada.setMedioPago(null);
+            facturaActualizada.setImportePagado(null);
+            facturaActualizada.setInteresImporte(BigDecimal.ZERO);
+        }
 
         if (estadoNuevo == EstadoFactura.PAGADA) {
             if (facturaActualizada.getFechaPago() == null || 
@@ -145,7 +150,11 @@ public class FacturaServiceImpl implements FacturaService {
             } else {
                 facturaExistente.setInteresImporte(BigDecimal.ZERO);
             }
-            
+        } else if (estadoNuevo == EstadoFactura.ANULADA) {
+            facturaExistente.setFechaPago(null);
+            facturaExistente.setMedioPago(null);
+            facturaExistente.setImportePagado(null);
+            facturaExistente.setInteresImporte(BigDecimal.ZERO);
         } else {
             facturaExistente.setFechaPago(null);
             facturaExistente.setMedioPago(null);
@@ -160,6 +169,9 @@ public class FacturaServiceImpl implements FacturaService {
         facturaExistente.setEstado(estadoNuevo);
         facturaExistente.setImporte(facturaActualizada.getImporte());
         facturaExistente.setFechaVencimiento(facturaActualizada.getFechaVencimiento());
+        BigDecimal interesCalculado = facturaExistente.getInteresImporte() != null
+            ? facturaExistente.getInteresImporte()
+            : BigDecimal.ZERO;
         facturaExistente.setImporteTotal(facturaActualizada.getImporte().add(interesCalculado));
 
         return facturaRepository.save(facturaExistente);
