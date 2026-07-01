@@ -24,6 +24,45 @@
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
         <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
 
+        <div class="card bg-white border shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-light fw-bold text-secondary">Panel de búsqueda y filtros</div>
+            <div class="card-body">
+                <form th:action="@{/publicaciones}" method="get" class="row g-3">
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">ID Propiedad</label>
+                        <input type="number" name="propiedadId" th:value="${propiedadId}" class="form-control form-control-sm" placeholder="Ej: 3">
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label small fw-bold text-muted">Dirección</label>
+                        <input type="text" name="direccion" th:value="${direccion}" class="form-control form-control-sm" placeholder="Ej: Rivadavia">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Ciudad</label>
+                        <input type="text" name="ciudad" th:value="${ciudad}" class="form-control form-control-sm" placeholder="Ej: Córdoba">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Estado</label>
+                        <select name="estado" class="form-select form-select-sm">
+                            <option value="">-- Todos --</option>
+                            <option th:each="est : ${estados}" th:value="${est}" th:text="${est}" th:selected="${est == estadoSeleccionado}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Precio Min.</label>
+                        <input type="number" step="0.01" name="precioMin" th:value="${precioMin}" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Precio Max.</label>
+                        <input type="number" step="0.01" name="precioMax" th:value="${precioMax}" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary btn-sm px-3">Filtrar</button>
+                        <a th:href="@{/publicaciones}" class="btn btn-outline-secondary btn-sm px-3">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
@@ -50,6 +89,7 @@
                               th:text="${pub.estado}"></span>
                     </td>
                     <td class="text-center">
+                        <a th:href="@{/publicaciones/editar/{id}(id=${pub.id})}" class="btn btn-warning btn-sm me-2 shadow-sm">Editar</a>
                         <a th:href="@{/publicaciones/eliminar/{id}(id=${pub.id})}" class="btn btn-danger btn-sm shadow-sm" 
                            onclick="return confirm('¿Está seguro de eliminar esta publicación?');">Eliminar</a>
                     </td>

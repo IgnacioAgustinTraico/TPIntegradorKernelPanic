@@ -8,7 +8,7 @@
 <body class="bg-light p-4">
 <div class="card border-0 shadow-lg rounded-4">
     <div class="card-header bg-primary text-white py-4 px-4">
-        <h2 class="fw-bold mb-1">Nueva Publicación</h2>
+        <h2 class="fw-bold mb-1" th:text="${publicacion.id == null} ? 'Nueva Publicación' : 'Modificar Publicación #' + ${publicacion.id}"></h2>
         <small class="opacity-75">Ingrese las condiciones y el precio para publicar el inmueble</small>
     </div>
 
@@ -20,12 +20,13 @@
 
             <div class="col-12">
                 <label class="form-label fw-semibold">Seleccionar Propiedad Disponible</label>
-                <select th:field="*{propiedad}" class="form-select" required>
+                <select th:field="*{propiedad}" class="form-select" th:disabled="${publicacion.id != null}" required>
                     <option value="">-- Seleccione una Propiedad --</option>
                     <option th:each="prop : ${propiedades}" 
                             th:value="${prop.id}" 
                             th:text="${prop.direccion} + ' - ' + ${prop.ciudad.nombre}"></option>
                 </select>
+                <input type="hidden" th:if="${publicacion.id != null}" th:field="*{propiedad}" />
             </div>
 
             <div class="col-md-6">

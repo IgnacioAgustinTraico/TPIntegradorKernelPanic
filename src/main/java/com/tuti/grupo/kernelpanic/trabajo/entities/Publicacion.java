@@ -3,6 +3,9 @@ package com.tuti.grupo.kernelpanic.trabajo.entities;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "publicacion")
@@ -33,6 +36,9 @@ public class Publicacion {
     @JoinColumn(name = "propiedad_id", nullable = false)
     private Propiedad propiedad;
 
+    @OneToMany(mappedBy = "publicacion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistorialEstadoPublicacion> historialEstados = new ArrayList<>();
+
     public Publicacion() {}
 
     // Getters y Setters
@@ -52,4 +58,14 @@ public class Publicacion {
     public void setEliminada(boolean eliminada) { this.eliminada = eliminada; }
     public Propiedad getPropiedad() { return propiedad; }
     public void setPropiedad(Propiedad propiedad) { this.propiedad = propiedad; }
+    public List<HistorialEstadoPublicacion> getHistorialEstados() { return historialEstados; }
+    public void setHistorialEstados(List<HistorialEstadoPublicacion> historialEstados) { this.historialEstados = historialEstados; }
+
+    public void agregarHistorialEstado(EstadoPublicacion estado) {
+        HistorialEstadoPublicacion historial = new HistorialEstadoPublicacion();
+        historial.setEstado(estado);
+        historial.setFechaHora(LocalDateTime.now());
+        historial.setPublicacion(this);
+        this.historialEstados.add(historial);
+    }
 }

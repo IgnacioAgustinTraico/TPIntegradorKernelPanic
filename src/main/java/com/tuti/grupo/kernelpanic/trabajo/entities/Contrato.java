@@ -1,8 +1,12 @@
 package com.tuti.grupo.kernelpanic.trabajo.entities;
 
 import jakarta.persistence.*;
+import org.springframework.format.annotation.DateTimeFormat;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "contrato")
@@ -13,6 +17,7 @@ public class Contrato {
     private Long id;
 
     @Column(nullable = false)
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate fechaInicio;
 
     @Column(nullable = false)
@@ -42,6 +47,9 @@ public class Contrato {
     @JoinColumn(name = "inquilino_id", nullable = false)
     private Persona inquilino;
 
+    @OneToMany(mappedBy = "contrato", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HistorialEstadoContrato> historialEstados = new ArrayList<>();
+
 
     public Contrato() {}
 
@@ -66,4 +74,14 @@ public class Contrato {
     public void setPropiedad(Propiedad propiedad) { this.propiedad = propiedad; }
     public Persona getInquilino() { return inquilino; }
     public void setInquilino(Persona inquilino) { this.inquilino = inquilino; }
+    public List<HistorialEstadoContrato> getHistorialEstados() { return historialEstados; }
+    public void setHistorialEstados(List<HistorialEstadoContrato> historialEstados) { this.historialEstados = historialEstados; }
+
+    public void agregarHistorialEstado(EstadoContrato estado) {
+        HistorialEstadoContrato historial = new HistorialEstadoContrato();
+        historial.setEstado(estado);
+        historial.setFechaHora(LocalDateTime.now());
+        historial.setContrato(this);
+        this.historialEstados.add(historial);
+    }
 }

@@ -46,7 +46,7 @@ public class Propiedad {
     @Column(nullable = false)
     private Boolean eliminada = false;
 
-    @Column(nullable = false)
+    @Column(name = "contrato_activo", nullable = false, columnDefinition = "BIT(1)")
     private Boolean contratoActivo = false;
 
     @OneToMany(mappedBy = "propiedad", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)

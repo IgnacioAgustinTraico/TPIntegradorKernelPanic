@@ -23,12 +23,48 @@
     <div class="card-body p-4">
         <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
+        <div class="card bg-white border shadow-sm rounded-3 mb-4">
+            <div class="card-header bg-light fw-bold text-secondary">Panel de búsqueda y filtros</div>
+            <div class="card-body">
+                <form th:action="@{/contratos}" method="get" class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Dirección</label>
+                        <input type="text" name="direccion" th:value="${direccion}" class="form-control form-control-sm" placeholder="Ej: San Martín">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">ID Propiedad</label>
+                        <input type="number" name="propiedadId" th:value="${propiedadId}" class="form-control form-control-sm" placeholder="Ej: 5">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">ID Inquilino</label>
+                        <input type="number" name="inquilinoId" th:value="${inquilinoId}" class="form-control form-control-sm" placeholder="Ej: 12">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Estado</label>
+                        <select name="estado" class="form-select form-select-sm">
+                            <option value="">-- Todos --</option>
+                            <option th:each="est : ${estados}" th:value="${est}" th:text="${est}" th:selected="${est == estadoSeleccionado}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label small fw-bold text-muted">Fecha Inicio</label>
+                        <input type="date" name="fechaInicio" th:value="${fechaInicio}" class="form-control form-control-sm">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end gap-2">
+                        <button type="submit" class="btn btn-primary btn-sm px-3">Filtrar</button>
+                        <a th:href="@{/contratos}" class="btn btn-outline-secondary btn-sm px-3">Limpiar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table table-hover align-middle">
                 <thead class="table-dark">
                 <tr>
                     <th>ID</th>
                     <th>Inmueble (Dirección)</th>
+                    <th>Propietario</th>
                     <th>Inquilino</th>
                     <th>Fecha Inicio</th>
                     <th>Duración (Meses)</th>
@@ -42,6 +78,7 @@
                 <tr th:each="con : ${contratos}">
                     <td class="fw-bold" th:text="${con.id}"></td>
                     <td th:text="${con.propiedad.direccion} + ' (' + ${con.propiedad.ciudad.nombre} + ')'"></td>
+                    <td th:text="${con.propiedad.propietario != null ? con.propiedad.propietario.nombre : '-'}"></td>
                     <td th:text="${con.inquilino.nombre}"></td>
                     <td th:text="${con.fechaInicio}"></td>
                     <td th:text="${con.duracionMeses} + ' m.'"></td>
@@ -59,7 +96,7 @@
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(contratos)}">
-                    <td colspan="9" class="text-center py-5">
+                    <td colspan="10" class="text-center py-5">
                         <div class="text-secondary">
                             <h5>No hay contratos registrados</h5>
                             <small>Presione "+ Nuevo Contrato" para iniciar una simulación de alquiler.</small>

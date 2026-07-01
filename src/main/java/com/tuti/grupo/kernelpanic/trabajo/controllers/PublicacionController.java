@@ -17,33 +17,58 @@ public class PublicacionController {
     private PublicacionService publicacionService;
 
     @Autowired
-    private PropiedadService propiedadService; // Lo necesitamos para listar propiedades en el formulario
+    private PropiedadService propiedadService;
 
-    // 1. LISTADO DE PUBLICACIONES (HU 2.4)
     @GetMapping
-    public String listarPublicaciones(Model model) {
-        model.addAttribute("publicaciones", publicacionService.obtenerTodasActivas());
+    public String listarPublicaciones(
+            @RequestParam(required = false) Long propiedadId,
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) String ciudad,
+            @RequestParam(required = false) EstadoPublicacion estado,
+            @RequestParam(required = false) java.math.BigDecimal precioMin,
+            @RequestParam(required = false) java.math.BigDecimal precioMax,
+            Model model) {
+        model.addAttribute("publicaciones", publicacionService.filtrar(propiedadId, direccion, ciudad, estado, precioMin, precioMax));
+        model.addAttribute("propiedadId", propiedadId);
+        model.addAttribute("direccion", direccion);
+        model.addAttribute("ciudad", ciudad);
+        model.addAttribute("estadoSeleccionado", estado);
+        model.addAttribute("precioMin", precioMin);
+        model.addAttribute("precioMax", precioMax);
+        model.addAttribute("estados", EstadoPublicacion.values());
         return "publicaciones-lista";
     }
 
-    // 2. MOSTRAR FORMULARIO DE ALTA (HU 2.1)
     @GetMapping("/nueva")
     public String mostrarFormularioNueva(Model model) {
         model.addAttribute("publicacion", new Publicacion());
-        // Pasamos las propiedades activas para que el usuario elija cuál publicar
         model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
         model.addAttribute("estados", EstadoPublicacion.values());
         return "publicacion-form";
     }
 
-    // 3. PROCESAR Y GUARDAR EL FORMULARIO (HU 2.1 / HU 2.3)
+    @GetMapping("/editar/{id}")
+    public String mostrarFormularioEditar(@PathVariable("id") Long id, Model model) {
+        try {
+            Publicacion publicacion = publicacionService.buscarPorId(id);
+            model.addAttribute("publicacion", publicacion);
+            model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
+            model.addAttribute("estados", EstadoPublicacion.values());
+            return "publicacion-form";
+        } catch (RuntimeException e) {
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("publicaciones", publicacionService.obtenerTodasActivas());
+            model.addAttribute("estados", EstadoPublicacion.values());
+            return "publicaciones-lista";
+        }
+    }
+
     @PostMapping("/guardar")
     public String guardarPublicacion(@ModelAttribute("publicacion") Publicacion publicacion, Model model) {
         try {
             publicacionService.guardarPublicacion(publicacion);
             return "redirect:/publicaciones";
         } catch (RuntimeException e) {
-            // Si el servicio salta con un error de negocio, volvemos al formulario con el mensaje
             model.addAttribute("error", e.getMessage());
             model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
             model.addAttribute("estados", EstadoPublicacion.values());
@@ -51,16 +76,15 @@ public class PublicacionController {
         }
     }
 
-    // 4. ELIMINACIÓN LÓGICA (HU 2.2)
     @GetMapping("/eliminar/{id}")
     public String eliminarPublicacion(@PathVariable("id") Long id, Model model) {
         try {
             publicacionService.eliminarPublicacion(id);
             return "redirect:/publicaciones";
         } catch (RuntimeException e) {
-            // Si falla la eliminación por regla de negocio, volvemos a la lista mostrando el error
             model.addAttribute("error", e.getMessage());
             model.addAttribute("publicaciones", publicacionService.obtenerTodasActivas());
+            model.addAttribute("estados", EstadoPublicacion.values());
             return "publicaciones-lista";
         }
     }

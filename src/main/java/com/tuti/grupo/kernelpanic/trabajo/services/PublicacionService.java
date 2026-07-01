@@ -3,6 +3,7 @@ package com.tuti.grupo.kernelpanic.trabajo.services;
 import com.tuti.grupo.kernelpanic.trabajo.entities.Publicacion;
 import com.tuti.grupo.kernelpanic.trabajo.entities.EstadoPublicacion;
 import com.tuti.grupo.kernelpanic.trabajo.entities.EstadoPropiedad;
+import com.tuti.grupo.kernelpanic.trabajo.entities.HistorialEstadoPublicacion;
 import com.tuti.grupo.kernelpanic.trabajo.repositories.PublicacionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,9 +17,12 @@ public class PublicacionService {
     @Autowired
     private PublicacionRepository publicacionRepository;
 
-    // Obtener las publicaciones para el listado de la pantalla
     public List<Publicacion> obtenerTodasActivas() {
         return publicacionRepository.findByEliminadaFalse();
+    }
+
+    public List<Publicacion> filtrar(Long propiedadId, String direccion, String ciudad, EstadoPublicacion estado, BigDecimal precioMin, BigDecimal precioMax) {
+        return publicacionRepository.buscarConFiltros(propiedadId, direccion, ciudad, estado, precioMin, precioMax);
     }
 
     public Publicacion buscarPorId(Long id) {
@@ -26,10 +30,7 @@ public class PublicacionService {
                 .orElseThrow(() -> new RuntimeException("La publicación no existe."));
     }
 
-    // FLUJO ALTA (HU 2.1) con las validaciones del equipo
     public Publicacion guardarPublicacion(Publicacion publicacion) {
-        
-        // 1. Validación de campos obligatorios
         if (publicacion.getPrecioMensual() == null) {
             throw new RuntimeException("El precio mensual es obligatorio.");
         }
@@ -37,41 +38,62 @@ public class PublicacionService {
             throw new RuntimeException("Debe seleccionar una propiedad.");
         }
 
-        // 2. Validación de números positivos
         if (publicacion.getPrecioMensual().compareTo(BigDecimal.ZERO) <= 0) {
             throw new RuntimeException("El precio mensual debe ser un valor positivo mayor a cero.");
         }
 
-        // 3. Regla de negocio: la propiedad debe estar DISPONIBLE
         if (publicacion.getPropiedad().getEstadoDisponibilidad() != EstadoPropiedad.DISPONIBLE) {
             throw new RuntimeException("No se puede publicar esta propiedad porque no está disponible (está reservada, alquilada o inactiva).");
         }
 
-        // 4. Regla de negocio: no duplicar publicaciones activas para la misma propiedad
         if (publicacion.getId() == null) { // Si es una publicación nueva
             boolean yaExisteActiva = publicacionRepository.existsByPropiedadIdAndEstadoAndEliminadaFalse(
                     publicacion.getPropiedad().getId(), EstadoPublicacion.ACTIVA);
             if (yaExisteActiva) {
                 throw new RuntimeException("Esta propiedad ya cuenta con una publicación activa.");
             }
-            // Setea la fecha de publicación al día de hoy
             publicacion.setFechaPublicacion(LocalDate.now());
+            if (publicacion.getEstado() == null) {
+                publicacion.setEstado(EstadoPublicacion.ACTIVA);
+            }
+        } else {
+            Publicacion publicacionOriginal = buscarPorId(publicacion.getId());
+            publicacion.setPropiedad(publicacionOriginal.getPropiedad());
+            if (publicacionOriginal.getEstado() == EstadoPublicacion.FINALIZADA && publicacion.getEstado() != EstadoPublicacion.FINALIZADA) {
+                throw new RuntimeException("No se puede modificar una publicación FINALIZADA para volverla a un estado anterior.");
+            }
+            validarTransicionEstadoPublicacion(publicacionOriginal, publicacion);
+            if (publicacionOriginal.getEstado() != publicacion.getEstado()) {
+                publicacion.agregarHistorialEstado(publicacion.getEstado());
+            }
         }
 
         return publicacionRepository.save(publicacion);
     }
 
-    // FLUJO ELIMINACIÓN LÓGICA (HU 2.2)
     public void eliminarPublicacion(Long id) {
         Publicacion pub = buscarPorId(id);
-        
-        // Regla de negocio: No se puede eliminar si ya está FINALIZADA
-        if (pub.getEstado() == EstadoPublicacion.FINALIZADA) {
-            throw new RuntimeException("No se puede eliminar una publicación que ya ha sido finalizada.");
+        if (pub.getEstado() != EstadoPublicacion.ACTIVA) {
+            throw new RuntimeException("Solo se pueden eliminar publicaciones en estado ACTIVA.");
         }
-        
-        // Marcamos borrado lógico
         pub.setEliminada(true);
         publicacionRepository.save(pub);
+    }
+
+    private void validarTransicionEstadoPublicacion(Publicacion publicacionOriginal, Publicacion publicacionActualizada) {
+        EstadoPublicacion estadoAnterior = publicacionOriginal.getEstado();
+        EstadoPublicacion estadoNuevo = publicacionActualizada.getEstado();
+
+        if (estadoAnterior == EstadoPublicacion.FINALIZADA && estadoNuevo == EstadoPublicacion.ACTIVA) {
+            throw new RuntimeException("No se puede volver una publicación FINALIZADA a ACTIVA.");
+        }
+
+        if (estadoNuevo == EstadoPublicacion.ACTIVA && publicacionActualizada.getPropiedad() != null && publicacionActualizada.getPropiedad().getId() != null) {
+            boolean existeOtraActiva = publicacionRepository.existsByPropiedadIdAndEliminadaFalseAndEstadoAndIdNot(
+                    publicacionActualizada.getPropiedad().getId(), EstadoPublicacion.ACTIVA, publicacionActualizada.getId());
+            if (existeOtraActiva) {
+                throw new RuntimeException("No se puede activar la publicación porque ya existe otra publicación activa para la misma propiedad.");
+            }
+        }
     }
 }

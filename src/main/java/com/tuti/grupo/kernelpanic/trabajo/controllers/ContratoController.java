@@ -25,8 +25,20 @@ public class ContratoController {
 
 
     @GetMapping
-    public String listarContratos(Model model) {
-        model.addAttribute("contratos", contratoService.obtenerTodosActivos());
+    public String listarContratos(
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) Long propiedadId,
+            @RequestParam(required = false) Long inquilinoId,
+            @RequestParam(required = false) EstadoContrato estado,
+            @RequestParam(required = false) java.time.LocalDate fechaInicio,
+            Model model) {
+        model.addAttribute("contratos", contratoService.filtrar(direccion, propiedadId, inquilinoId, estado, fechaInicio));
+        model.addAttribute("direccion", direccion);
+        model.addAttribute("propiedadId", propiedadId);
+        model.addAttribute("inquilinoId", inquilinoId);
+        model.addAttribute("estadoSeleccionado", estado);
+        model.addAttribute("fechaInicio", fechaInicio);
+        model.addAttribute("estados", EstadoContrato.values());
         return "contratos-lista";
     }
 
@@ -65,6 +77,7 @@ public class ContratoController {
             return "redirect:/contratos";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("contrato", contrato);
             model.addAttribute("propiedades", propiedadService.obtenerTodasActivas());
             model.addAttribute("inquilinos", personaRepository.findAllByEliminadaFalseOrderByNombreAsc());
             model.addAttribute("estados", EstadoContrato.values());
@@ -81,6 +94,8 @@ public class ContratoController {
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
             model.addAttribute("contratos", contratoService.obtenerTodosActivos());
+            model.addAttribute("direccion", null);
+            model.addAttribute("estados", EstadoContrato.values());
             return "contratos-lista";
         }
     }
